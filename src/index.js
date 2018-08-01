@@ -10,7 +10,7 @@ class ImgFigure extends Component {
     this.figureDOM = null;
     this.state = {
       styleObj: {},
-      className: ""
+      className: "img-figure"
     };
   }
 
@@ -19,7 +19,7 @@ class ImgFigure extends Component {
       ...nextProps.arrange.pos,
       transform: "rotate(" + nextProps.arrange.rotate + "deg)"
     };
-    var className =  "img-figure"
+    var className = "img-figure";
     className += nextProps.arrange.isInverse ? " is-inverse " : "";
     this.setState({
       styleObj,
@@ -35,9 +35,13 @@ class ImgFigure extends Component {
   }
 
   handleClick(e) {
+    if (this.props.arrange.isCenter) {
+      this.props.inverse();
+    } else {
+      this.props.center();
+    }
     e.preventDefault();
     e.stopPropagation();
-    this.props.inverse();
   }
   render() {
     return (
@@ -53,9 +57,7 @@ class ImgFigure extends Component {
         <figcaption>
           <h2 className="img-title">{this.props.title}</h2>
           <div className="img-back" onClick={this.handleClick.bind(this)}>
-            <p>
-              {this.props.description}
-            </p>
+            <p>{this.props.description}</p>
           </div>
         </figcaption>
       </figure>
@@ -83,9 +85,23 @@ class App extends Component {
         //   },
         // rotate: 0,
         // isInverse: false,
+        // isCenter: false
         // }
       ]
     };
+    imageJson.forEach((val, index) => {
+      if (!this.state.imgsArrangeArr[index]) {
+        this.state.imgsArrangeArr[index] = {
+          pos: {
+            left: 0,
+            top: 0
+          },
+          rotate: 0,
+          isInverse: false,
+          isCenter: false
+        };
+      }
+    });
     this.stageDOM = null;
     this.aImgDOM = [];
     this.controllerUnits = [];
@@ -151,7 +167,11 @@ class App extends Component {
       });
     };
   }
-
+  center(index) {
+    return () => {
+      this.rearrange(index);
+    };
+  }
   //重新布局所有图片，centerIndex指定居中排布哪个图片
   rearrange(centerIndex) {
     let imgsArrangeArr = this.state.imgsArrangeArr,
@@ -224,7 +244,6 @@ class App extends Component {
       newImgsArrangeArr,
       [centerIndex, 0].concat(imgsArrangeCenterArr)
     );
-
     this.setState({
       imgsArrangeArr: newImgsArrangeArr
     });
@@ -239,7 +258,8 @@ class App extends Component {
             top: 0
           },
           rotate: 0,
-          isInverse: false
+          isInverse: false,
+          isCenter: false
         };
       }
       return (
@@ -251,6 +271,7 @@ class App extends Component {
             this.aImgDOM.push(e);
           }}
           inverse={this.inverse(index)}
+          center={this.center(index)}
           arrange={this.state.imgsArrangeArr[index]}
         />
       );

@@ -44,10 +44,7 @@ img {
       transform-origin: 0 50% 0;
 
       &.is-inverse {
-        transform: rotateY(180deg) translateX(-100%);
-        .img-back {
-            transform: none;
-        }
+        transform: rotateY(180deg) translateX(-100%) !important;
       }
     }
     figcaption {
