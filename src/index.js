@@ -4,13 +4,20 @@ import "./index.scss";
 
 var imageJson = require("./img/imgData.json");
 
+function getRangeRandom(low, high) {
+  return Math.ceil(Math.random() * (high - low) + low);
+}
+
+function get30DegRandom() {
+  return (Math.random() > 0.5 ? "" : "-") + Math.ceil(Math.random() * 30);
+}
+
 class ImgFigure extends Component {
   constructor(props) {
     super(props);
     this.figureDOM = null;
     this.state = {
-      styleObj: {
-      },
+      styleObj: {},
       className: "img-figure"
     };
   }
@@ -20,16 +27,16 @@ class ImgFigure extends Component {
       ...nextProps.arrange.pos,
       transform: "rotate(" + nextProps.arrange.rotate + "deg)"
     };
-    if(nextProps.arrange.isCenter) {
-        styleObj = {
-          ...styleObj,
-          zIndex: 11
-        }
+    if (nextProps.arrange.isCenter) {
+      styleObj = {
+        ...styleObj,
+        zIndex: 11
+      };
     } else {
-        styleObj = {
-          ...styleObj,
-          zIndex: 0
-        }
+      styleObj = {
+        ...styleObj,
+        zIndex: 0
+      };
     }
     var className = "img-figure";
     className += nextProps.arrange.isInverse ? " is-inverse " : "";
@@ -77,12 +84,48 @@ class ImgFigure extends Component {
   }
 }
 
-function getRangeRandom(low, high) {
-  return Math.ceil(Math.random() * (high - low) + low);
-}
+class ControllerUnit extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      controllerUnitClassName: 'controller-unit'
+    };
+  }
 
-function get30DegRandom() {
-  return (Math.random() > 0.5 ? "" : "-") + Math.ceil(Math.random() * 30);
+  componentWillReceiveProps(nextProps) {
+    var name = this.state.controllerUnitClassName;
+   
+    if (nextProps.arrange.isCenter) {
+      name += " is-center";
+      if (nextProps.arrange.isInverse) {
+        name += " is-inverse";
+      }
+    } else {
+      name = 'controller-unit';
+    }
+    this.setState({controllerUnitClassName: name});
+  }
+
+  handleClick(e) {
+    //如果点击的是当前正在选中态的按钮，则反转图片，否则将对应的图片居中显示
+    if (this.props.arrange.isCenter) {
+      this.props.inverse();
+    } else {
+      this.props.center();
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  render() {
+    return (
+      <span
+        className={this.state.controllerUnitClassName}
+        onClick={this.handleClick.bind(this)}
+      />
+    );
+  }
 }
 
 class App extends Component {
@@ -101,19 +144,6 @@ class App extends Component {
         // }
       ]
     };
-    imageJson.forEach((val, index) => {
-      if (!this.state.imgsArrangeArr[index]) {
-        this.state.imgsArrangeArr[index] = {
-          pos: {
-            left: 0,
-            top: 0
-          },
-          rotate: 0,
-          isInverse: false,
-          isCenter: false
-        };
-      }
-    });
     this.stageDOM = null;
     this.aImgDOM = [];
     this.controllerUnits = [];
@@ -135,6 +165,19 @@ class App extends Component {
         topY: [0, 0]
       }
     };
+    imageJson.forEach((val, index) => {
+      if (!this.state.imgsArrangeArr[index]) {
+        this.state.imgsArrangeArr[index] = {
+          pos: {
+            left: 0,
+            top: 0
+          },
+          rotate: 0,
+          isInverse: false,
+          isCenter: false
+        };
+      }
+    });
   }
   //组件加载后，为每张图片计算其范围
   componentDidMount() {
@@ -263,17 +306,6 @@ class App extends Component {
 
   getImageData() {
     return imageJson.map((val, index) => {
-      if (!this.state.imgsArrangeArr[index]) {
-        this.state.imgsArrangeArr[index] = {
-          pos: {
-            left: 0,
-            top: 0
-          },
-          rotate: 0,
-          isInverse: false,
-          isCenter: false
-        };
-      }
       return (
         <ImgFigure
           {...val}
@@ -289,8 +321,21 @@ class App extends Component {
       );
     });
   }
-
+  getControllerUnits() {
+    return imageJson.map((val, index) => {
+      return (
+        <ControllerUnit
+          key={index}
+          arrange={this.state.imgsArrangeArr[index]}
+          inverse={this.inverse(index)}
+          center={this.center(index)}
+        />
+      );
+    });
+  }
   render() {
+    var aImg = this.getImageData();
+    var aController = this.getControllerUnits();
     return (
       <section
         className="stage"
@@ -298,8 +343,8 @@ class App extends Component {
           this.stageDOM = e;
         }}
       >
-        <section className="img-sec">{this.getImageData()}</section>
-        <nav className="controller-nav">{this.controllerUnits}</nav>
+        <section className="img-sec">{aImg}</section>
+        <nav className="controller-nav">{aController}</nav>
       </section>
     );
   }
