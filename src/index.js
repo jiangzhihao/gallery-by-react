@@ -9,7 +9,8 @@ class ImgFigure extends Component {
     super(props);
     this.figureDOM = null;
     this.state = {
-      styleObj: {},
+      styleObj: {
+      },
       className: "img-figure"
     };
   }
@@ -19,6 +20,17 @@ class ImgFigure extends Component {
       ...nextProps.arrange.pos,
       transform: "rotate(" + nextProps.arrange.rotate + "deg)"
     };
+    if(nextProps.arrange.isCenter) {
+        styleObj = {
+          ...styleObj,
+          zIndex: 11
+        }
+    } else {
+        styleObj = {
+          ...styleObj,
+          zIndex: 0
+        }
+    }
     var className = "img-figure";
     className += nextProps.arrange.isInverse ? " is-inverse " : "";
     this.setState({
