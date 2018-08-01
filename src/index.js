@@ -93,7 +93,7 @@ class ControllerUnit extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    var name = this.state.controllerUnitClassName;
+    var name = 'controller-unit';
    
     if (nextProps.arrange.isCenter) {
       name += " is-center";
